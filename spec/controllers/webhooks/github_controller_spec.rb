@@ -8,16 +8,17 @@ RSpec.describe Webhooks::GithubController, type: :request do
     send_payload(payload, **opts)
   end
 
-  def send_payload(payload, type:)
+  def send_payload(payload, type:, signature: repo.sign(payload))
     post "/webhooks/github", payload, {
       "Content-Type" => "application/json",
-      "X-Github-Event" => type
+      "X-Github-Event" => type,
+      "X-Hub-Signature" => signature
     }
   end
 
   it "handles unknown event types" do
     send_payload_fixture "open_pull_request", type: "bananas"
-    expect(response).to be_success
+    expect(response).to be_unauthorized
   end
 
   context "when a pull request is opened" do
@@ -38,11 +39,18 @@ RSpec.describe Webhooks::GithubController, type: :request do
       }.to change { repo.pull_requests.count }.by(1)
     end
 
-    it "ignores missing repositories" do
+    it "requires a valid signature" do
+      expect {
+        send_payload_fixture "open_pull_request", type: "pull_request", signature: "sha1=fake"
+        expect(response).to be_unauthorized
+      }.not_to change { PullRequest.count }
+    end
+
+    it "handles missing repositories" do
       repo.update!(github_id: 1)
       expect {
         send_payload_fixture "open_pull_request", type: "pull_request"
-        expect(response).to be_success
+        expect(response).to be_unauthorized
       }.not_to change { PullRequest.count }
     end
   end
@@ -59,6 +67,13 @@ RSpec.describe Webhooks::GithubController, type: :request do
       pull_request.update!(github_id: 1)
       send_payload_fixture "close_pull_request", type: "pull_request"
       expect(response).to be_success
+    end
+
+    it "requires a valid signature" do
+      expect {
+        send_payload_fixture "close_pull_request", type: "pull_request", signature: "sha1=fake"
+        expect(response).to be_unauthorized
+      }.not_to change { pull_request.reload.updated_at }
     end
 
     context "when a label is added" do
