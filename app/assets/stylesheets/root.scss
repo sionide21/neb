@@ -1,0 +1,14 @@
+// Place all the styles related to the root controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+.acronym {
+    font-size: 72pt;
+    font-family: impact;
+    line-height: 72pt;
+}
+
+.word::first-letter {
+  color: red;
+  font-size: 80pt;
+  letter-spacing: 5px;
+}
