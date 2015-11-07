@@ -18,7 +18,7 @@ RSpec.describe Webhooks::GithubController, type: :request do
 
   it "handles unknown event types" do
     send_payload_fixture "open_pull_request", type: "bananas"
-    expect(response).to be_unauthorized
+    expect(response).to be_success
   end
 
   context "when a pull request is opened" do

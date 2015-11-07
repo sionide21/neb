@@ -4,7 +4,11 @@ class HashStruct < BasicObject
   end
 
   def method_missing(key, *)
-    val = @hash.fetch(key.to_s) { super }
+    try(key) { super }
+  end
+
+  def try(key)
+    val = @hash.fetch(key.to_s) { yield if block_given? }
     ::Hash === val ? ::HashStruct.new(val) : val
   end
 

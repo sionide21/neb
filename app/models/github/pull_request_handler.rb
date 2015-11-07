@@ -43,9 +43,5 @@ module Github
     def action
       payload.action
     end
-
-    def repository
-      Repository.find_by(github_id: payload.repository.id)
-    end
   end
 end

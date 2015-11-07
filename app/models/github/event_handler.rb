@@ -29,6 +29,7 @@ module Github
     end
 
     def repository
+      Repository.find_by(github_id: payload.try(:repository).try(:id))
     end
 
     attr_reader :payload
