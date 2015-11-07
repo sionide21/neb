@@ -106,5 +106,18 @@ RSpec.describe Webhooks::GithubController, type: :request do
         }.to change { pull_request.reload.state }.to("closed")
       end
     end
+
+    context "when the PR is reopened" do
+      before(:each) do
+        pull_request.update!(github_id: 50041081)
+      end
+
+      it "updates the state" do
+        expect {
+          send_payload_fixture "reopen_pull_request", type: "pull_request"
+          expect(response).to be_success
+        }.to change { pull_request.reload.state }.to("open")
+      end
+    end
   end
 end

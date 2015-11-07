@@ -20,9 +20,11 @@ module Github
       )
     end
 
-    def closed
+    def update_state
       pull_request.update!(state: payload.pull_request.state)
     end
+    alias_method :closed, :update_state
+    alias_method :reopened, :update_state
 
     def labeled
       pull_request.labels << payload.label.name
