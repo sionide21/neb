@@ -4,5 +4,7 @@ Rails.application.routes.draw do
   get '/signout' => 'sessions#destroy', :as => :signout
   get '/auth/failure' => 'sessions#failure'
 
+  post '/webhooks/github' => 'webhooks/github#receive'
+
   root 'root#index'
 end
